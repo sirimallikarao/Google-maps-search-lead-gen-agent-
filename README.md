@@ -1,160 +1,188 @@
-# Google Maps Lead Generation Agent - N8N Workflow
-An automated lead generation system that extracts business contact information from Google Maps and enriches the data with AI-generated insights.
+# 🗺️ Google Maps Lead Generation Agent – n8n Workflow
 
-# 🚀 Features
-Automated Google Maps Scraping: Extracts business listings from Google Maps search results
-Intelligent Data Processing: Systematically processes multiple pages of search results
-AI-Powered Enrichment: Uses Groq AI to generate likely contact emails and business backgrounds
-Google Sheets Integration: Automatically stores and updates data in Google Sheets
-Real-time Processing: Triggers on new data additions for continuous enrichment
+An automated lead generation system that scrapes business listings from **Google Maps**, enhances data using **AI**, and stores it in **Google Sheets** — perfect for marketers, sales teams, and automation enthusiasts.
 
-# 📋 What It Does
-Search & Extract: Searches Google Maps for businesses based on your query
-Data Collection: Extracts business name, address, phone, website, rating, and hours
-AI Enhancement: Generates professional email addresses and business descriptions
-Storage: Saves all data to Google Sheets with unique identifiers
-Enrichment: Automatically enhances records with additional contact info
+---
 
-# 🛠️ Workflow Components
-#Main Workflow
+## 🚀 Features
 
-AI Agent: Orchestrates the entire lead generation process
-Map Search Tool: Queries Google Maps API via Serper
-Google Sheets Tool: Stores extracted business data
-Chat Trigger: Allows manual initiation of searches
+- 🔍 **Automated Google Maps Scraping**: Extracts business listings from Google Maps using Serper API  
+- 🧠 **AI-Powered Enrichment**: Generates likely professional email addresses & business descriptions using Groq AI  
+- 🗂️ **Structured Data Storage**: Automatically saves data into Google Sheets with unique tracking  
+- 🔁 **Real-time Processing**: Continuously enriches new entries as they are added  
+- 📃 **Multi-Page Processing**: Crawls up to 5 pages per search for comprehensive coverage  
 
-# Data Enrichment Workflow
+---
 
-Google Sheets Trigger: Monitors for new entries
-Groq AI Integration: Generates emails and business backgrounds
-Batch Processing: Handles multiple records efficiently
+## 📋 What It Does
 
-# 📊 Data Structure
+1. **Search & Extract**  
+   Searches Google Maps for businesses based on user queries.
+
+2. **Data Collection**  
+   Gathers business name, address, phone number, website, ratings, and opening hours.
+
+3. **AI Enrichment**  
+   Generates likely business emails and a brief background using AI.
+
+4. **Storage**  
+   Saves the entire dataset into Google Sheets.
+
+5. **Continuous Enhancement**  
+   New entries are automatically enhanced with AI insights.
+
+---
+
+## 🛠️ Workflow Components
+
+### 🔁 Main Workflow
+
+- **AI Agent** – Orchestrates the overall process  
+- **Map Search Tool** – Uses Serper API to query Google Maps  
+- **Google Sheets Tool** – Handles data writing  
+- **Chat Trigger** – Allows manual search initiation
+
+### 🧠 Data Enrichment Workflow
+
+- **Google Sheets Trigger** – Watches for new additions  
+- **Groq AI Node** – Enhances records with email & business background  
+- **Batch Processor** – Processes multiple records sequentially
+
+---
+
+## 📊 Data Structure
+
 Each business record contains:
 
-UUID: Unique identifier for tracking
-Name: Business name
-Address: Complete business address
-Number: Phone number (without + prefix)
-Website: Business website URL
-Rating: Google Maps rating
-Opening Hours: Business operating hours
-Email: AI-generated professional email
-Background: AI-generated business description
+| Field           | Description                           |
+|----------------|---------------------------------------|
+| `UUID`          | Unique ID for tracking               |
+| `Name`          | Business name                        |
+| `Address`       | Full address                         |
+| `Number`        | Phone number (no + prefix)           |
+| `Website`       | Website URL                          |
+| `Rating`        | Google Maps star rating              |
+| `Opening Hours` | Business hours                       |
+| `Email`         | AI-generated professional email      |
+| `Background`    | AI-generated business description    |
 
-# ⚙️ Setup Requirements
-API Keys & Credentials
+---
 
-# Serper API: For Google Maps data extraction
+## ⚙️ Setup Requirements
 
-# Get your API key from Serper.dev
-Add to X-API-KEY header in Map Search Tool
+### 🔑 API Keys & Configuration
 
-# OpenAI API: For the main AI agent
-Configure in OpenAI Chat Model node
-Recommended model: gpt-4o-mini
-# Groq API: For data enrichment
-Get API key from Groq
-Configure in HTTP Request header authentication
-# Google Sheets API: For data storage
-Set up Google Sheets OAuth2 credentials
-Create a new spreadsheet or use existing one
+| Service     | Purpose                      | Setup                                     |
+|-------------|------------------------------|-------------------------------------------|
+| **Serper API** | Google Maps Search            | Get key from [Serper.dev](https://serper.dev), add to `X-API-KEY` in headers |
+| **OpenAI API** | Orchestrating search process | Use `gpt-4o-mini`, configure in OpenAI node |
+| **Groq API**   | Email & description generation | Add Groq key to HTTP request auth headers |
+| **Google Sheets API** | Data storage | Set up OAuth2 credentials, provide spreadsheet ID |
 
-## Google Sheets Setup
+---
 
-Create a new Google Spreadsheet
-Add the following columns:
+## 📝 Google Sheets Setup
 
-UUID
-Name
-Address
-Number
-Website
-Rating
-Opening Hours
-Email
-Background
-Update the documentId in all Google Sheets nodes with your spreadsheet ID
+1. Create a new Google Spreadsheet  
+2. Add the following columns (exact spelling required):
 
-# 🔧 Configuration
-Geographic Settings
-The workflow is currently configured for India:
+UUID | Name | Address | Number | Website | Rating | Opening Hours | Email | Background
 
-# Coordinates: 17.3749816,78.5173563,17z (Hyderabad area)
-Language: English (hl=en)
-Country: India (gl=in)
+yaml
+Copy
+Edit
 
-# To change location, update the ll, gl, and location parameters in the Map Search Tool.
-Search Parameters
-Maximum Pages: 5 pages per search (configurable)
-Temperature: 0.1 for consistent AI responses
-Batch Processing: Processes items individually for reliability
+3. Copy the spreadsheet ID and update it in all relevant Google Sheets nodes in n8n
 
-# 📝 Usage
-Starting a Search
+---
 
-Open the chat interface for the workflow
-Send a message with your search query, for example:
+## 🌍 Configuration
 
-"Dental Clinic Ahmedabad"
-"Restaurants Mumbai"
-"Digital Marketing Agency Bangalore"
+- **Geographic Defaults**  
+  - Location: Hyderabad, India  
+  - Coordinates: `17.3749816,78.5173563,17z`  
+  - Language: `en`  
+  - Country: `in`  
 
-# Monitoring Progress
+- **To change location**: Update `ll`, `gl`, and `hl` in Map Search Tool parameters
 
-The AI agent provides real-time updates: "Processing page X of 5"
-Check your Google Sheets for extracted data
-Watch as records get enriched with AI-generated emails and backgrounds
+- **Search Parameters**
+  - Max Pages: 5  
+  - Temperature: 0.1 (for consistent AI responses)  
+  - Batch Size: 1 item per iteration (ensures reliability)
 
-# Data Flow
-Search Query → Google Maps API → Data Extraction → Google Sheets Storage → AI Enrichment → Updated Records
-🔒 Privacy & Compliance
+---
 
-Rate Limiting: Built-in delays prevent API abuse
-Data Accuracy: AI-generated emails are estimates based on business info
-Compliance: Ensure your use complies with Google's Terms of Service
-Data Storage: All data is stored in your private Google Sheets
+## ▶️ Usage Guide
 
-# 🚨 Important Notes
-Email Generation: Generated emails are educated guesses, not verified addresses
-API Limits: Monitor your API usage across all services
-Data Quality: Results depend on Google Maps data availability
-Rate Limits: The workflow includes built-in throttling for API compliance
+### 🔍 Starting a Search
 
-# 🔄 Workflow Architecture
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Chat Trigger  │ → │    AI Agent      │ → │  Google Sheets  │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                              │
-                              ↓
-                    ┌──────────────────┐
-                    │ Map Search Tool  │
-                    └──────────────────┘
-                              
-┌─────────────────────────────────────────────────────────────────┐
-│                    Data Enrichment Loop                         │
-│                                                                 │
-│ Sheets Trigger → Filter → Batch Loop → Groq AI → Update Sheets │
-└─────────────────────────────────────────────────────────────────┘
-# 📈 Performance Tips
+Use the **chat trigger** with a query such as:
 
-Batch Size: Process one record at a time to avoid API timeouts
-Error Handling: Built-in retry logic for failed requests
-Data Validation: Filters out header rows and empty records
-Memory Management: Uses window memory for conversation context
+Dental Clinic Ahmedabad
+Restaurants Mumbai
+Digital Marketing Agency Bangalore
 
-# 🛡️ Error Handling
+yaml
+Copy
+Edit
 
-JSON Parsing: Robust error handling for malformed AI responses
-API Failures: Graceful degradation with "N/A" fallbacks
-Rate Limiting: Automatic delays between requests
-Data Validation: Filters invalid records before processing
+### 📊 Monitoring Progress
 
-# 📞 Support
-If you encounter issues:
-Check API key configurations
-Verify Google Sheets permissions
-Monitor API rate limits
-Review n8n execution logs
+- Workflow prints updates like: `Processing page X of 5`
+- Google Sheet auto-populates with new business entries
+- Watch as AI fills in email & business descriptions
 
-Dm me for any doubts :www.linkedin.com/in/basaveni-sirimallika-rao-b9b88a323
+---
+
+## 🔁 Data Flow Diagram
+
+Search Query
+↓
+Google Maps API → Data Extraction → Google Sheets
+↓
+AI Enrichment (Groq)
+↓
+Updated Records in Sheets
+
+yaml
+Copy
+Edit
+
+---
+
+## 🛡️ Error Handling & Reliability
+
+- ✅ **Rate Limiting** – Automatic delays to avoid API blocking  
+- ⚠️ **Fallbacks** – Uses `"N/A"` if AI returns an invalid response  
+- 🧪 **Validation** – Filters out invalid or incomplete rows before processing  
+- ♻️ **Retries** – Handles API failures gracefully
+
+---
+
+## 📈 Performance Tips
+
+- Process one record at a time for optimal API reliability  
+- Monitor API rate limits regularly  
+- Enable logs in n8n for debugging and error tracing  
+- Filter header rows before processing to avoid false triggers  
+
+---
+
+## 🔒 Privacy & Compliance
+
+- ⚠️ AI-generated emails are **educated guesses** — not verified  
+- 📜 Ensure compliance with **Google Maps TOS**  
+- 🔐 All data stays within **your private Google Sheets**  
+- 🧩 Built-in throttling for safer scraping
+
+---
+
+## 🙋‍♀️ Support
+
+For help, feel free to **DM me**:  
+🔗 [LinkedIn – Basaveni Sirimallika Rao](https://www.linkedin.com/in/basaveni-sirimallika-rao-b9b88a323)
+
+---
+
+> 💡 Built with ❤️ using n8n, Groq, OpenAI & Google Sheets  
