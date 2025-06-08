@@ -1,0 +1,789 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a Google Maps lead generation specialist. Your task is to extract business contact information systematically.\n\nWORKFLOW STEPS:\n1. Search Google Maps starting from page 1\n2. Extract ALL business data from the current page\n3. Immediately save the extracted data to Google Sheets\n4. Move to the next page (increment page number by 1)\n5. Repeat until no results found OR maximum 5 pages processed\n\nDATA EXTRACTION RULES:\n- Extract every business from each page\n- Use this EXACT JSON format for Google Sheets:\n[\n{\n  \"Name\": \"Business name\",\n  \"Address\": \"Complete address\",\n  \"Number\": \"Phone number without + prefix\",\n  \"Website\": \"Website URL or N/A\",\n  \"Rating\": \"Rating score or N/A\",\n  \"Opening Hours\": \"Operating hours or N/A\",\n  \"Email\": \"Email address or N/A\"\n}\n]\n\nIMPORTANT CONSTRAINTS:\n- Process ONE page at a time\n- Save to Google Sheets after EACH page (never consolidate)\n- Remove + from phone numbers\n- Use \"N/A\" for missing information\n- STOP after 5 pages or when API returns no results\n- Start with page 1, then 2, 3, 4, 5\n\nSUCCESS CRITERIA:\n- Each page's data is saved separately\n- Clear progress indication (\"Processing page X of 5\")\n- Automatic termination when complete",
+          "maxIterations": 25
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -320,
+        1600
+      ],
+      "id": "e3c2b62b-d412-401f-9af8-fa4c84d26057",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        1820
+      ],
+      "id": "644fbcd6-3397-426d-b633-11d8fc437c43",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "BPkLGucw279o0UG0",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -260,
+        1820
+      ],
+      "id": "10b0081e-fc54-43e2-bc02-17170cfe03a9",
+      "name": "Window Memory"
+    },
+    {
+      "parameters": {
+        "name": "store_to_google_sheets",
+        "description": "Tool to store business data in Google Sheets. Accepts JSON array with business information including Name, Address, Number (without + prefix), Website, Rating, Opening Hours, and Email. Use N/A for missing fields.",
+        "workflowId": {
+          "__rl": true,
+          "value": "fo7TGLFSZVzx66OZ",
+          "mode": "list",
+          "cachedResultName": "Subworkflow of google map lead gen agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        140,
+        1820
+      ],
+      "id": "b6c0b2ef-792f-4118-aed6-aa413b5b25fc",
+      "name": "Google Sheets Tool"
+    },
+    {
+      "parameters": {
+        "toolDescription": "This bot helps you extract all contact information for lead generation from Google Maps.\nInput parameters:\n\"q\" for the search term (e.g., \"Dental Clinic Ahmedabad\").\n\"ll\" for geographic coordinates.\n\"page\" for the current search results page.",
+        "url": "https://google.serper.dev/maps",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "q"
+            },
+            {
+              "name": "ll",
+              "valueProvider": "fieldValue",
+              "value": "@17.3749816,78.5173563,17z"
+            },
+            {
+              "name": "page",
+              "valueProvider": "fieldValue",
+              "value": "1"
+            },
+            {
+              "name": "hl",
+              "valueProvider": "fieldValue",
+              "value": "en"
+            },
+            {
+              "name": "location",
+              "valueProvider": "fieldValue",
+              "value": "India"
+            },
+            {
+              "name": "gl",
+              "valueProvider": "fieldValue",
+              "value": "in"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-API-KEY",
+              "valueProvider": "fieldValue",
+              "value": "8cbbe22beb38813553c1e64b5ac1a9788661ab44"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -40,
+        1820
+      ],
+      "id": "76fe3757-6f7d-41ad-b2a2-50216ab8df51",
+      "name": "Map Search Tool1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        1600
+      ],
+      "id": "5bff70e8-9e62-4837-befd-e4f2d489cedf",
+      "name": "When chat message received",
+      "webhookId": "57499337-7750-4549-9c4d-bce4c31bc20f"
+    },
+    {
+      "parameters": {
+        "content": "## Map search agent \n\n\n",
+        "height": 520,
+        "width": 1100,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        1500
+      ],
+      "id": "8bfd9511-ac43-4fd8-a05f-7b9ed594879e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34",
+          "mode": "list",
+          "cachedResultName": "Google maps lead gen agent ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        2240
+      ],
+      "id": "9747e886-fded-4bf3-9d53-32973af3481b",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "EjCkM4jEpviIVqPb",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b925ecd9-541f-4d3c-9bc1-0f683bd420cc",
+              "leftValue": "={{ $json.Name }}",
+              "rightValue": "Name",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "e241db34-fd92-468e-802d-b4485d260b85",
+              "leftValue": "={{ $json.Name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        2240
+      ],
+      "id": "2896740e-d131-48cb-8ad5-a7e5d689b1b0",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        380,
+        2240
+      ],
+      "id": "f344caa1-5f68-4af3-b587-4afccccece50",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a research assistant. Based on the provided company information, generate likely contact email and business background. For email, create professional formats like info@, contact@, hello@ followed by domain from website. For background, provide 2-3 sentences about the business type and services. If information is insufficient, return 'N/A' for that field. Return ONLY valid JSON format with no additional text.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Company Name: {{$json.Name}}\\nAddress: {{$json.Address}}\\nWebsite: {{$json.Website}}\\nPhone: {{$json.Number}}\\nRating: {{$json.Rating}}\\n\\nProvide email and background in JSON format with keys 'Email' and 'Background'.\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"max_tokens\": 500,\n  \"response_format\": {\n    \"type\": \"json_object\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        2260
+      ],
+      "id": "029ecb15-0e19-477d-a568-e8f46f543cf6",
+      "name": "Groq API Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "uSf2xrRt54Dgm4zD",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Handle Groq API response\ntry {\n  const response = $input.all()[0].json;\n  let content;\n  \n  // Check if response has choices array (Groq format)\n  if (response.choices && response.choices[0] && response.choices[0].message) {\n    content = response.choices[0].message.content;\n  } else {\n    // Fallback if direct content\n    content = response.content || JSON.stringify(response);\n  }\n  \n  // Clean up any markdown formatting\n  const cleaned = content.replace(/```json/g, '').replace(/```/g, '').trim();\n  \n  // Parse JSON\n  let parsed;\n  try {\n    parsed = JSON.parse(cleaned);\n  } catch (parseError) {\n    // If JSON parsing fails, create default structure\n    console.log('JSON parse error:', parseError);\n    parsed = {\n      Email: 'N/A',\n      Background: 'N/A'\n    };\n  }\n  \n  // Ensure required fields exist and normalize case\n  const result = {\n    Email: parsed.Email || parsed.email || 'N/A',\n    Background: parsed.Background || parsed.background || 'N/A'\n  };\n  \n  return { data: result };\n  \n} catch (error) {\n  console.log('Error processing response:', error);\n  return {\n    data: {\n      Email: 'N/A',\n      Background: 'N/A'\n    }\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        2260
+      ],
+      "id": "ff570da8-740c-4ad6-aa2d-d33fdb5bc8c1",
+      "name": "Process Response"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34",
+          "mode": "list",
+          "cachedResultName": "Google maps lead gen agent ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.data.Email }}",
+            "Background": "={{ $json.data.Background }}",
+            "UUID": "={{ $('Loop Over Items').item.json.UUID }}"
+          },
+          "matchingColumns": [
+            "UUID"
+          ],
+          "schema": [
+            {
+              "id": "UUID",
+              "displayName": "UUID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Number",
+              "displayName": "Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Rating",
+              "displayName": "Rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Opening Hours",
+              "displayName": "Opening Hours",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Background",
+              "displayName": "Background",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1140,
+        2260
+      ],
+      "id": "8807a7e0-a26d-4baf-a08e-5a6d719fd784",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pi6VZImIG9evRo4h",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Keep this subworkflow in different workflow",
+        "height": 320,
+        "width": 940,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1200,
+        2180
+      ],
+      "typeVersion": 1,
+      "id": "b659e5a7-0d3b-4e15-a7e6-46e5484322ec",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34",
+          "mode": "list",
+          "cachedResultName": "Google maps lead gen agent ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15Uk54S69A6RJgMHAWGC8gZD-wQl0R8PCWHGQw4aUz34/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "UUID",
+              "displayName": "UUID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Number",
+              "displayName": "Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rating",
+              "displayName": "Rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Opening Hours",
+              "displayName": "Opening Hours",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -620,
+        2260
+      ],
+      "id": "66e138f0-267a-4eb4-a492-d75d9b79dfbc",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pi6VZImIG9evRo4h",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const v7 = () => {\n  return 'tttttttt-tttt-7xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c){\n    const r = Math.trunc(Math.random() * 16);\n    const v = c == 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  }).replace(/[t]{8}-[t]{4}/, function (){\n    const unixtimestamp = Date.now().toString(16).padStart(12, '0');\n    return unixtimestamp.slice(0, 8) + '-' + unixtimestamp.slice(8);\n  })\n}\n\nconst data = JSON.parse($input.all()[0].json.query);\nconst datawithId = data.map(i => {\n  const uuid = v7();\n  return { UUID: uuid, ... i}\n});\n\nreturn datawithId;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -840,
+        2260
+      ],
+      "id": "836f8973-1f5e-4d23-beee-f20f07ca7dd1",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "jsCode": "return { json: { response: \"ok \"}}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -440,
+        2260
+      ],
+      "id": "94005c0d-0b9e-4989-a9fc-a57dcfeeadbc",
+      "name": "Code4"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1060,
+        2260
+      ],
+      "id": "1b3d3588-1727-4ec5-8360-e5b8304dae8a",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Search Tool1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Groq API Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq API Request": {
+      "main": [
+        [
+          {
+            "node": "Process Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Response": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets2": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c7eaeb6745001c6be3e79c27b1de2f197c5e2743b8fc6b77fc8bbc2b286a06da"
+  }
+}
